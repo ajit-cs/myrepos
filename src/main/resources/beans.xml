@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/util
+    http://www.springframework.org/schema/util/spring-util-2.5.xsd">
+   
+   <bean id="total_scenarios_in_excel" class="java.lang.Integer">
+   <constructor-arg value="234"></constructor-arg>
+   </bean>
+   
+   <bean id="scenarios_to_run" class="java.lang.Integer">
+   <constructor-arg value="11"></constructor-arg>
+   </bean>
+   
+   <bean id="total_nodes" class="java.lang.Integer">
+   <constructor-arg value="3"></constructor-arg>
+   </bean>
+   
+    <!-- Not used yet.. -->
+   <bean id="access_down_nodes" class="java.lang.Boolean">
+   <constructor-arg value="false"></constructor-arg>
+   </bean>
+   
+	<bean id="waitTime_after_nodeUPDOWN" class="java.lang.Integer">
+   <constructor-arg value="10000"></constructor-arg>
+   </bean>
+   
+   	<bean id="retry" class="java.lang.Integer">
+   <constructor-arg value="0"></constructor-arg>
+   </bean>
+   
+   <bean id="node1" class="com.my.Node">
+   	<property name="user" value="cs"/>
+   	<property name="password" value="pass@123"/>
+   	<property name="neo4juser" value="neo4j"/>
+   	<property name="neo4jpassword" value="pass123"/>
+   	<property name="ip" value="192.168.132.217"/>
+   	<property name="port" value="7474"/>
+   	<property name="home_path" value="neo4j-enterprise-2.3.3"/>
+   </bean>
+   
+      <bean id="node2" class="com.my.Node">
+   	<property name="user" value="cs"/>
+   	<property name="password" value="pass@123"/>
+   	<property name="neo4juser" value="neo4j"/>
+   	<property name="neo4jpassword" value="pass123"/>
+   	<property name="ip" value="192.168.132.217"/>
+   	<property name="port" value="7477"/>
+   	<property name="home_path" value="neo4j-enterprise-2.3.3-slave"/>
+   </bean>
+   
+   <bean id="node3" class="com.my.Node">
+   	<property name="user" value="cs"/>
+   	<property name="password" value="pass@123"/>
+	<property name="neo4juser" value="neo4j"/>
+   	<property name="neo4jpassword" value="pass123"/>
+   	<property name="ip" value="192.168.132.217"/>
+   	<property name="port" value="7475"/>
+   	<property name="home_path" value="neo4j-enterprise-2.3.3-arbiter"/>
+   </bean>   
+  
+</beans>

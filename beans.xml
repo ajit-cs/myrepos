@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/util
+    http://www.springframework.org/schema/util/spring-util-2.5.xsd">
+   
+   <bean id="tablename" class="java.lang.String">
+   	<constructor-arg value="cuboid"/>
+   </bean>
+   <bean id="keyspace" class="java.lang.String">
+   	<constructor-arg value="mykey"/>
+   </bean>
+     
+
+   <!-- List of fixed attributes.The first attribute is primary key with unique ID generator attached to it. -->
+   <util:list id="productSetFixedAttributes" value-type="java.lang.String">
+	   	 	<value>prod_name</value>            
+	   	 	<value>bonus_point</value>
+	   	 	<value>priority</value>
+	   	 	<value>stickyness</value>
+	   	 	<value>source</value>	   	 		   	 		 		   	
+   </util:list>
+
+   <!-- List of variable attributes.  -->
+   <util:list id="productSetVariableAttributes" value-type="java.lang.String">
+	   	 	<value>normPrice</value>            
+	   	 	<value>promoPrice</value>
+	   	 	<value>marketPrice</value>	   	 	 		   	 		 		   
+   </util:list>
+
+	<!-- Number of market size -->
+   <bean id="marketCount" class="java.lang.Integer">
+   	<constructor-arg value="20"/>
+   </bean>
+   
+   
+   <util:map id="marketSet1" map-class="java.util.HashMap" key-type="java.lang.String" value-type="java.lang.String">
+   	<entry key="normPrice" value="12"/>
+   	<entry key="promoPrice" value="13"/>
+   	<entry key="marketPrice" value="14"/>
+   </util:map>
+   
+   <util:map id="marketSet2" map-class="java.util.HashMap" key-type="java.lang.String" value-type="java.lang.String">
+   	<entry key="normPrice" value="17"/>
+   	<entry key="promoPrice" value="18"/>
+   	<entry key="marketPrice" value="19"/>
+   </util:map>
+   
+      <util:map id="marketSet3" map-class="java.util.HashMap" key-type="java.lang.String" value-type="java.lang.String">
+   	<entry key="normPrice" value="125"/>
+   	<entry key="promoPrice" value="135"/>
+   	<entry key="marketPrice" value="145"/>
+   </util:map>
+   
+      <util:map id="marketSet4" map-class="java.util.HashMap" key-type="java.lang.String" value-type="java.lang.String">
+   	<entry key="normPrice" value="121"/>
+   	<entry key="promoPrice" value="131"/>
+   	<entry key="marketPrice" value="141"/>
+   </util:map>
+   
+   <!-- List of Market ranges -->
+   <bean id="marketsRange1" class="com.my.MarketsRange">
+       <property name="start_range" value="1"/>
+       <property name="end_range" value="4"/>                          
+   </bean>
+      <bean id="marketsRange2" class="com.my.MarketsRange">
+       <property name="start_range" value="5"/>
+       <property name="end_range" value="8"/>                          
+   </bean>
+      <bean id="marketsRange3" class="com.my.MarketsRange">
+       <property name="start_range" value="9"/>
+       <property name="end_range" value="13"/>                          
+   </bean>
+      <bean id="marketsRange4" class="com.my.MarketsRange">
+       <property name="start_range" value="14"/>
+       <property name="end_range" value="20"/>                          
+   </bean>
+   
+     <bean id="marketsRange5" class="com.my.MarketsRange">
+       <property name="start_range" value="11"/>
+       <property name="end_range" value="13"/>                          
+   </bean>
+      <bean id="marketsRange6" class="com.my.MarketsRange">
+       <property name="start_range" value="18"/>
+       <property name="end_range" value="20"/>                          
+   </bean>
+      <bean id="marketsRange7" class="com.my.MarketsRange">
+       <property name="start_range" value="14"/>
+       <property name="end_range" value="17"/>                          
+   </bean>
+      <bean id="marketsRange8" class="com.my.MarketsRange">
+       <property name="start_range" value="1"/>
+       <property name="end_range" value="10"/>                          
+   </bean> 
+   
+
+   <!-- Sets of marketRange lists -->
+   <util:list id="marketRangeList1" value-type="com.my.MarketsRange">
+	   	 	<ref bean="marketsRange1"/>
+	   	 	<ref bean="marketsRange2"/>		   	 	
+   </util:list>
+      <util:list id="marketRangeList2" value-type="com.my.MarketsRange">
+	   	 	<ref bean="marketsRange3"/>
+	   	 	<ref bean="marketsRange4"/>		   	 	
+   </util:list>
+      <util:list id="marketRangeList3" value-type="com.my.MarketsRange">
+	   	 	<ref bean="marketsRange5"/>
+	   	 	<ref bean="marketsRange6"/>		   	 	
+   </util:list>
+      <util:list id="marketRangeList4" value-type="com.my.MarketsRange">
+	   	 	<ref bean="marketsRange7"/>
+	   	 	<ref bean="marketsRange8"/>		   	 	
+   </util:list>
+   
+   <!-- Map MarketSets to MarketRange lists -->
+   <util:map id="marketMap1" map-class="java.util.HashMap" key-type="java.util.HashMap" value-type="java.util.List">
+   	<entry key-ref="marketSet1" value-ref="marketRangeList1"/>
+   	<entry key-ref="marketSet2" value-ref="marketRangeList2"/>
+   </util:map>
+      <util:map id="marketMap2" map-class="java.util.HashMap" key-type="com.my.MarketSet" value-type="java.util.List">
+   	<entry key-ref="marketSet3" value-ref="marketRangeList3"/>
+   	<entry key-ref="marketSet4" value-ref="marketRangeList4"/>
+   </util:map>
+   
+   
+   
+   <!-- List of Product Sets -->
+    <util:list id="finalMap"  value-type="java.util.HashMap">
+   	 <ref bean="productSetMap1"/>
+   	 <ref bean="productSetMap2"/>
+    </util:list>
+   
+   
+   <!-- Product Set -->   
+   <util:map id="productSetMap1" map-class="java.util.HashMap" key-type="java.lang.String" value-type="java.lang.Object">
+   		<entry key="prod_name" value="coke"/>
+   		<entry key="bonus_point" value="100"/>
+   		<entry key="priority" value="1"/>
+	    <entry key="stickyness" value="1"/>
+   		<entry key="source" value="news"/>   
+		<entry key="MarketSet" value-ref="marketMap1"/>     <!-- This key 'MarketSet' is fixed. It cannot be changed -->     
+   </util:map>
+            
+      
+   <util:map id="productSetMap2" map-class="java.util.HashMap" key-type="java.lang.String" value-type="java.lang.Object">
+   		<entry key="prod_name" value="pepsi"/>
+   		<entry key="bonus_point" value="200"/>
+   		<entry key="priority" value="1"/>
+	    <entry key="stickyness" value="1"/>
+   		<entry key="source" value="tv"/>   	
+ 	    <entry key="MarketSet" value-ref="marketMap2"/>       
+   </util:map>
+   
+  
+   <!-- Count of records to be created for each product Set -->
+      <util:map id="recordMap" map-class="java.util.HashMap" key-type="java.util.HashMap" value-type="java.lang.Integer">
+   	<entry key-ref="productSetMap1" value="10"/>
+   	<entry key-ref="productSetMap2" value="10"/>
+   </util:map>
+   
+</beans>
