@@ -1,0 +1,1 @@
+{"id":"","label":"$1","isCreated":true,"defaultValue":"","description":"","icon":"","isMandatory":false,"tooltip":"","placeholder":"","type":"com.cs.config.interactor.model.concrete.attribute.HTMLAttributeModel","validator":{"allowedFrames":[],"defaultStyles":[],"allowedRTEIcons":[]}}
