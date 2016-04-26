@@ -1,6 +1,6 @@
-package com.test.neo4j;
+package com.test.elastic;
 
-public class Node {
+public class ElasticNode {
 	String user="";
 	String password="";
 	String neo4juser="";

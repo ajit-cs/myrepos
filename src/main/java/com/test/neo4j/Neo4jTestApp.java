@@ -1,4 +1,4 @@
-package com.my;
+package com.test.neo4j;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -40,13 +40,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-public class MainApp {
+public class Neo4jTestApp {
 
 	String USER_AGENT = "Mozilla/5.0";
 	CloseableHttpClient client;
@@ -100,7 +101,7 @@ public class MainApp {
 		    row=1;
 		 try
 	        {
-	            FileInputStream file = new FileInputStream(new File("src\\main\\resources\\excel.xls"));
+	            FileInputStream file = new FileInputStream(new File("src\\main\\resources\\neo4j\\excel.xls"));
 	 
 	            //Create Workbook instance holding reference to .xlsx file
 	            HSSFWorkbook workbook = new HSSFWorkbook(file);
@@ -136,9 +137,14 @@ public class MainApp {
 	         		    	   {
 	         		    		    final_command[row][0]=(column+1)+"";
 	         		    		    final_command[row][1]=commands[row][column];
+	         		    		   
+	         		    	   }
+	         		    	   else
+	         		    	   {
+	         		    		   
 	         		    	   }
 	         		    	   
-	         		    	   column++;
+	         		    	  column++;
 	                            
 	                            
 	                            break;
@@ -148,9 +154,7 @@ public class MainApp {
 	                //System.out.println("");
 	            }
 	            file.close();
-	            for(int i=0;i<235;i++)
-	            	for(int j=0;j<2;j++)
-	            		System.out.println(final_command[i][j]);
+	           
 	        } 
 	        catch (Exception e) 
 	        {
@@ -162,15 +166,16 @@ public class MainApp {
 	 {
 		 	System.out.println("Restarting cluster...");
 		 	// stop all nodes
-		 	node_command(3,nodes[2],"DOWN");
+		 	
 			node_command(1,nodes[0],"DOWN");
 			node_command(2,nodes[1],"DOWN");
-			
+			node_command(3,nodes[2],"DOWN");
 			 
 			// start all nodes.. Node 3 master initially
-			node_command(3,nodes[2],"UP");
+			
 			node_command(1,nodes[0],"UP");
 			node_command(2,nodes[1],"UP");
+			node_command(3,nodes[2],"UP");
 			
 	 }
 	 public void clear_alldata()
@@ -253,10 +258,6 @@ public class MainApp {
 		 for(int i=1;i<=scenarios_to_run;i++)  
 	    {
 			 	//scenario id
-			 System.out.println("scen id"+ scenarioid);
-	    		
-	    		System.out.println(final_command[i][0]+"scen id/.   "+ nodeno);
-	    		
 	    		nodeno=Integer.parseInt(final_command[i][0]);
 	    		node_command(nodeno,nodes[nodeno-1],final_command[i][1]);
 	    		retry=(int) context.getBean("retry");
@@ -373,7 +374,7 @@ public class MainApp {
 	}
 	public static void main(String[] args) throws Exception
 	{
-		new MainApp().start();
+		new Neo4jTestApp().start();
 	}
 	public void login()throws Exception
 	{
@@ -397,7 +398,6 @@ public class MainApp {
 				System.out.println("Login successful. Now redirecting\n");
 			
 			}
-			System.out.println("ad");
 			Header[] h = response.getAllHeaders();
 			BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 
@@ -406,7 +406,6 @@ public class MainApp {
 			while ((line2 = rd.readLine()) != null) {
 				result.append(line2);
 			}
-			System.out.println("ac");
 			// print login response result if required
 			//System.out.println(result);
 			
@@ -420,7 +419,6 @@ public class MainApp {
 			}
 			StringTokenizer st = new StringTokenizer(id, ";");
 			 sessionid=st.nextToken();
-			 System.out.println("ab");
 		}
 		catch(Exception e)
 		{
@@ -581,8 +579,8 @@ public class MainApp {
 	}
 	public void cluster_check(int nodeno, String command) throws Exception
 	{
-		Thread.sleep(12000); 
-		
+		Thread.sleep(waitTime_after_nodeUPDOWN); 
+		int downcounter=0;
 		System.out.println("---------- Cluster status -------------");
 		for(int i=0;i<nodes.length;i++)
 		{
@@ -612,6 +610,8 @@ public class MainApp {
 			System.out.print("Node"+(i+1)+"\t");
 			System.out.print(res);
 			
+			
+			
 			if(res.equals("master"))
 				final_result[scenarioid][6]="Node"+(i+1); 
 			if(res.equals("UNKNOWN"))
@@ -628,11 +628,12 @@ public class MainApp {
 			catch(HttpHostConnectException e)
 			{
 				//System.out.println("exception happened - here's what I know: ");
-				//e.printStackTrace();
+				e.printStackTrace();
 				System.out.print("Node"+(i+1)+"\t");
 				//System.out.print(response2.toString());
 				System.out.println("\tDOWN");
 				current_node_status[i]="DOWN";
+				downcounter++;
 			}
 			catch(Exception e)
 			{
@@ -646,28 +647,23 @@ public class MainApp {
 		{
 			System.out.println("\nUnknown state reached..");
 			final_result[scenarioid][6]="No Master";
-			final_result[scenarioid][7]="INCONSISTENT STATE - Unresponsive";
+			final_result[scenarioid][7]="INCONSISTENT STATE";
 			unknown_state=false;
 		}
-		
-		//check if cluster is stable as per last node command
-		/*if( nodeno!=0)
+		if (downcounter==nodes.length)
 		{
-			if((! current_node_status[nodeno].equals(command)) && ( retry!=0))
-			{
-				System.out.println("retrying ... "+retry);
-				cluster_check(nodeno, command);
-				retry--;
-			}
-				
-		}*/
+			final_result[scenarioid][6]="";
+			final_result[scenarioid][7]="Unresponsive";
+			downcounter=0;
+		}
+		
+
 	}
 	public void configure()throws Exception
 	{
 		parser = new JSONParser(); 
-		context = new ClassPathXmlApplicationContext("beans.xml");
-		 br = new BufferedReader(new FileReader(new File("src\\main\\resources\\commands.txt"))); 
-		  content = new Scanner(new File("src\\main\\resources\\jsonwrite.txt")).useDelimiter("\\Z").next();
+		context = new ClassPathXmlApplicationContext("neo4j\\beans.xml");
+		  content = new Scanner(new File("src\\main\\resources\\neo4j\\jsonwrite.txt")).useDelimiter("\\Z").next();
 						  
 		 //context variables
 		  total_scenarios_in_excel=(int) context.getBean("total_scenarios_in_excel");
@@ -696,16 +692,16 @@ public class MainApp {
 		HSSFWorkbook workbook = new HSSFWorkbook();
 		HSSFSheet sheet = workbook.createSheet("sheet");
 		 
-		Map<String, Object[]> data = new HashMap<String, Object[]>();
+		Map<String, Object[]> data = new LinkedHashMap<String, Object[]>();
 		
 		data.put("1",new Object[] {"Sr No","Node1","Node2","Node3","Node1","Node2","Node3","MasterNode","Comments"} );
 		for(int i=1;i<=scenarios_to_run;i++)
 		{
 			data.put((i+1)+"", new Object[] {i+"",final_result[i][0],final_result[i][1],final_result[i][2],final_result[i][3],final_result[i][4],final_result[i][5],final_result[i][6], final_result[i][7]});
 		}
-		
 
 		Set<String> keyset = data.keySet();
+		
 		int rownum = 0;
 		for (String key : keyset) {
 		    Row row = sheet.createRow(rownum++);
@@ -727,12 +723,12 @@ public class MainApp {
 		try {
 			Date date3=new Date();
 			String tt=date3.toString().replaceAll(":",".");
-			File file=new File("src\\main\\resources\\output\\Output "+tt+".xls");
+			File file=new File("src\\main\\resources\\neo4j\\output\\Output "+tt+".xls");
 			Boolean b = file.createNewFile();
 			if(b)
-				System.out.println("Output Excel created");
+				System.out.println("\nOutput Excel created");
 			else
-				System.out.println("Excel creation failed");
+				System.out.println("\nExcel creation failed");
 		    FileOutputStream out = 
 		            new FileOutputStream(file);
 		    workbook.write(out);
