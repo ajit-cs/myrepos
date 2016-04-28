@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -84,6 +85,7 @@ public class ElasticTestApp {
 	 String current_node_status[];
 	 int retry;
 	 JSONObject obj=null;
+	String index_name_to_create;
 	
 	 public void restart_cluster() throws Exception
 	 {
@@ -173,7 +175,7 @@ public class ElasticTestApp {
 			try
 			{
 				//create index myindex
-				String url2 = "http://"+nodes[0].getIp()+":"+nodes[0].getPort()+"/myindex";
+				String url2 = "http://"+nodes[0].getIp()+":"+nodes[0].getPort()+"/"+index_name_to_create;
 				
 				
 				client = HttpClients.createDefault();
@@ -201,7 +203,7 @@ public class ElasticTestApp {
 				
 				
 				//set replica
-				 url2 = "http://"+nodes[0].getIp()+":"+nodes[0].getPort()+"/myindex/_settings";
+				 url2 = "http://"+nodes[0].getIp()+":"+nodes[0].getPort()+"/"+index_name_to_create+"/_settings";
 				JSONObject o=(JSONObject) parser.parse("{\"number_of_replicas\": 2}");
 				
 				StringEntity params = new StringEntity(o.toJSONString(), "UTF-8");
@@ -237,22 +239,19 @@ public class ElasticTestApp {
 			}
 	 }
 
-	public void start() throws Exception
+	public void start()
 	{
 		try
 		{
 		Date date1 = new Date();		
 		configure(); 
-		readexcel();
+		read_excel();
 		clear_alldata();
 		restart_cluster();
 		
 		create_index();
 		
-		//node_command(1,nodes[0],"DOWN");
-		
 		 cluster_check();
-		// System.exit(0);
 		 
 		 int nodeno=0;
 		 scenarioid=1;
@@ -261,20 +260,31 @@ public class ElasticTestApp {
 		 //Main loop.. Iterate over test scenarios
 		 for(int i=1;i<=scenarios_to_run;i++)  
 	    {
-	    		nodeno=Integer.parseInt(final_command[i][0]);
+			 try{
+				 
+			 
+				 System.out.println("loop starts");
+			 	nodeno=Integer.parseInt(final_command[i][0]);
 	    		node_command(nodeno,nodes[nodeno-1],final_command[i][1]);
 	    		cluster_check();		
+	    		System.out.println("now read write");
 	    		read_write();
+	    		
+	    		System.out.println("now read write done");
 	    		
 	    		final_result[scenarioid][4]=commands[scenarioid][0];
 	    		final_result[scenarioid][5]=commands[scenarioid][1];
 	    		final_result[scenarioid][6]=commands[scenarioid][2];
 	    		
+	    		System.out.println("now print done");
+	    		
 	    		scenarioid++;
+			 }
+			 catch(Exception e)
+			 {
+				 System.out.println("Loop exception happnened. "+e.getCause());
+			 }
 	    }
-		 
-		//System.exit(0); 
-		 
 		 
 		 //Print final results
 		 System.out.println("Final Result as below");
@@ -312,11 +322,13 @@ public class ElasticTestApp {
 		
 		
 		writexcel();
-		}catch(Exception e)
+		
+		}
+		catch(Exception e)
 		{
+			System.out.println("final exc"+e.getCause()+" "+e.getMessage());
 			e.printStackTrace();
 		}
-		System.exit(0);
 	}
 	
 	public void node_command(int nodeid,ElasticNode node, String updown) throws IOException 
@@ -413,7 +425,7 @@ public class ElasticTestApp {
 			try
 			{
 				// read Node
-				String url2 = "http://"+nodes[i].getIp()+":"+nodes[i].getPort()+"/myindex/mydoc/_search?size=100";
+				String url2 = "http://"+nodes[i].getIp()+":"+nodes[i].getPort()+"/"+index_name_to_create+"/mydoc/_search?size=100";
 				
 				client = HttpClients.createDefault();
 				 httpGet = new HttpGet(url2);
@@ -503,7 +515,7 @@ public class ElasticTestApp {
 			{
 				// write Node
 				
-				String url3 = "http://"+nodes[i].getIp()+":"+nodes[i].getPort()+"/myindex/mydoc/";
+				String url3 = "http://"+nodes[i].getIp()+":"+nodes[i].getPort()+"/"+index_name_to_create+"/mydoc/";
 				HttpPost httpPut;
 				httpPut = new HttpPost(url3);
 				
@@ -524,6 +536,7 @@ public class ElasticTestApp {
 					System.out.print(" SUCCESS\n");
 					 write_status[i]="SUCCESS";
 					 total_write_success_counter++;
+					 System.out.println("Write label is => A"+scenarioid);
 					
 				}
 				else
@@ -548,7 +561,7 @@ public class ElasticTestApp {
 				reader.close();
 				// print result
 				
-				System.out.println("Write label is => A"+scenarioid);
+				
 				//System.out.println("\nwrite response JSON is => "+response2.toString());
 				 obj = (JSONObject)parser.parse(response2.toString());
 		
@@ -697,6 +710,7 @@ public class ElasticTestApp {
 						{
 							//System.out.println("under if");
 							final_result[scenarioid][7]=node_status[r][1];
+							final_result[scenarioid][8]="";
 						}
 					}
 					
@@ -782,7 +796,7 @@ public class ElasticTestApp {
 		 total_nodes=(int) context.getBean("total_nodes");
 		 access_down_nodes=(Boolean) context.getBean("access_down_nodes");
 		 waitTime_after_nodeUPDOWN=(int) context.getBean("waitTime_after_nodeUPDOWN");
-		 
+		 index_name_to_create=(String) context.getBean("index_name_to_create");
 		 //other vars
 		 current_node_status=new String[3];
 		 read_status=new String[3];
@@ -802,7 +816,7 @@ public class ElasticTestApp {
 		HSSFWorkbook workbook = new HSSFWorkbook();
 		HSSFSheet sheet = workbook.createSheet("sheet");
 		 
-		Map<String, Object[]> data = new HashMap<String, Object[]>();
+		Map<String, Object[]> data = new LinkedHashMap<String, Object[]>();
 		
 		data.put("1",new Object[] {"Sr No","Node1","Node2","Node3","Health","Node1","Node2","Node3","MasterNode","Comments"} );
 		for(int i=1;i<=scenarios_to_run;i++)
@@ -865,7 +879,7 @@ public class ElasticTestApp {
 		try
 		{
 			// read Node
-			String url2 = "http://"+nodes[0].getIp()+":"+nodes[0].getPort()+"/myindex/mydoc/_search?size=500";
+			String url2 = "http://"+nodes[0].getIp()+":"+nodes[0].getPort()+"/"+index_name_to_create+"/mydoc/_search?size=500";
 			
 			client = HttpClients.createDefault();
 			 httpGet = new HttpGet(url2);
@@ -921,7 +935,7 @@ public class ElasticTestApp {
 		}
 		
 	}
-	 public void readexcel()
+	 public void read_excel()
 	 {
 		  commands=new String[total_scenarios_in_excel+1][3];
 		  final_command=new String[total_scenarios_in_excel+1][2];

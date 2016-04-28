@@ -13,7 +13,11 @@
    </bean>
    
    <bean id="scenarios_to_run" class="java.lang.Integer">
-   <constructor-arg value="234"></constructor-arg>
+   <constructor-arg value="4"></constructor-arg>
+   </bean>
+   
+      <bean id="index_name_to_create" class="java.lang.String">
+   <constructor-arg value="testindex"></constructor-arg>
    </bean>
    
    <bean id="total_nodes" class="java.lang.Integer">
@@ -26,7 +30,7 @@
    </bean>
    
 	<bean id="waitTime_after_nodeUPDOWN" class="java.lang.Integer">
-   <constructor-arg value="10000"></constructor-arg>
+   <constructor-arg value="15000"></constructor-arg>
    </bean>
 
    
